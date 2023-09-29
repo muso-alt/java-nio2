@@ -1,0 +1,81 @@
+About this tutorial
+The new input/output (NIO) library was introduced with JDK 1.4. Picking up where original I/O leaves off, NIO provides high-speed, block-oriented I/O in standard Java code. By defining classes to hold data, and by processing that data in blocks, NIO takes advantage of low-level optimizations in a way that the original I/O package could not, without using native code.
+
+In this tutorial, we'll cover almost every aspect of the NIO library, from the high-level conceptual stuff to under-the-hood programming detail. In addition to learning about crucial I/O elements like buffers and channels, you'll have the opportunity to see how standard I/O works in the updated library. You'll also learn about things you can only do with NIO, such as asynchronous I/O and direct buffers.
+
+Throughout the tutorial, we'll work with code samples that illustrate different aspects of the NIO library. Almost every code sample is part of an extended Java program, which you'll find in the Resource links in the right-hand column. As you are working through the exercises, you're encouraged to download, compile, and run these programs on your own system. The code will also come in handy when you're done with the tutorial, providing a starting point for your NIO programming efforts.
+
+This tutorial is intended for any programmer who wants to learn more about the JDK 1.4 NIO library. To get the most from the discussion you should understand basic Java programming concepts such as classes, inheritance, and using packages. Some familiarity with the original I/O library (from the java.io.* package) will also be helpful.
+
+While this tutorial does require a working vocabulary and conceptual understanding of the Java language, it does not require a lot of actual programming experience. In addition to explaining thoroughly all the concepts relevant to the tutorial, I've kept the code examples fairly small and simple. The goal is to provide an easy entry point for learning about NIO, even for those who don't have much Java programming experience.
+
+How to run the code
+The source code archive (available in Resources) contains all of the programs used in this tutorial. Each program consists of a single Java file. Each file is identified by name and easily related to the programming concept it illustrates.
+
+Some of the programs in the tutorial require command-line arguments to run. To run a program from the command line, simply go to your nearest command-line prompt. Under Windows, the command-line prompt is the "Command" or "command.com" program. Under UNIX, any shell will do.
+
+You will need to have JDK 1.4 installed and in your path to complete the exercises in the tutorial. See Resources if you need help installing and configuring JDK 1.4.
+
+Input/output: A conceptual overview
+Intro to I/O
+I/O -- or input/output -- refers to the interface between a computer and the rest of the world, or between a single program and the rest of the computer. It is such a crucial element of any computer system that the bulk of any I/O is actually built into the operating system. Individual programs generally have most of their work done for them.
+
+In Java programming, I/O has until recently been carried out using a stream metaphor. All I/O is viewed as the movement of single bytes, one at a time, through an object called a Stream. Stream I/O is used for contacting the outside world. It is also used internally, for turning objects into bytes and then back into objects.
+
+NIO has the same role and purpose as original I/O, but it uses a different metaphor -- block I/O. As you will learn in this tutorial, block I/O can be a lot more efficient than stream I/O.
+
+Why NIO?
+NIO was created to allow Java programmers to implement high-speed I/O without having to write custom native code. NIO moves the most time-consuming I/O activities (namely, filling and draining buffers) back into the operating system, thus allowing for a great increase in speed.
+
+Streams versus blocks
+The most important distinction between the original I/O library (found in java.io.* ) and NIO has to do with how data is packaged and transmitted. As previously mentioned, original I/O deals with data in streams, whereas NIO deals with data in blocks.
+
+A stream-oriented I/O system deals with data one byte at a time. An input stream produces one byte of data, and an output stream consumes one byte of data. It is very easy to create filters for streamed data. It is also relatively simply to chain several filters together so that each one does its part in what amounts to a single, sophisticated processing mechanism. On the flip side, stream-oriented I/O is often rather slow.
+
+A block-oriented I/O system deals with data in blocks. Each operation produces or consumes a block of data in one step. Processing data by the block can be much faster than processing it by the (streamed) byte. But block-oriented I/O lacks some of the elegance and simplicity of stream-oriented I/O.
+
+Integrated I/O
+The original I/O package and NIO have been well integrated in JDK 1.4. java.io.* has been reimplemented using NIO as its base, so it can now take advantage of some features of NIO. For example, some of the classes in the java.io.* package contain methods to read and write data in blocks, which leads to faster processing even in more stream-oriented systems.
+
+It is also possible to use the NIO library to implement standard I/O functions. For example, you could easily use block I/O to move data one byte at a time. But as you will see, NIO also offers many advantages that are not available from the original I/O package.
+
+Channels and buffers
+Channels and buffers overview
+Channel s and Buffer s are the central objects in NIO, and are used for just about every I/O operation.
+
+Channels are analogous to streams in the original I/O package. All data that goes anywhere (or comes from anywhere) must pass through a Channel object. A Buffer is essentially a container object. All data that is sent to a channel must first be placed in a buffer; likewise, any data that is read from a channel is read into a buffer.
+
+In this section, you will learn about working with channels and buffers in NIO.
+
+What is a buffer?
+A Buffer is an object, which holds some data, that is to be written to or that has just been read from. The addition of the Buffer object in NIO marks one of the most significant differences between the new library and original I/O. In stream-oriented I/O, you wrote data directly to, and read data directly from, Stream objects.
+
+In the NIO library, all data is handled with buffers. When data is read, it is read directly into a buffer. When data is written, it is written into a buffer. Anytime you access data in NIO, you are pulling it out of the buffer.
+
+A buffer is essentially an array. Generally, it is an array of bytes, but other kinds of arrays can be used. But a buffer is more than just an array. A buffer provides structured access to data and also keeps track of the system's read/write processes.
+
+Kinds of buffers
+The most commonly used kind of buffer is the ByteBuffer. A ByteBuffer allows get/set operations (that is, the getting and setting of bytes) on its underlying byte array.
+
+ByteBuffer is not the only type of buffer in NIO. In fact, there is a buffer type for each of the primitive Java types:
+
+ByteBuffer
+CharBuffer
+ShortBuffer
+IntBuffer
+LongBuffer
+FloatBuffer
+DoubleBuffer
+Each of the Buffer classes is an instance of the Buffer interface. With the exception of ByteBuffer, each one has the exact same operations, differing only in the type of data it deals with. Because ByteBuffer is used for most standard I/O operations it has all of the shared buffer operations as well as some that are unique.
+
+You may want to take a moment now to run the UseFloatBuffer.java, which contains an example of typed buffers in action.
+
+What is a channel?
+A Channel is an object from which you can read data and to which you can write data. Comparing NIO with original I/O, a channel is like a stream.
+
+As previously mentioned, all data is handled through Buffer objects. You never write a byte directly to a channel; instead you write to a buffer containing one or more bytes. Likewise, you don't read a byte directly from a channel; you read from a channel into a buffer, and then get the bytes from the buffer.
+
+Kinds of channels
+Channels differ from streams in that they are bi-directional. Whereas streams only go in one direction (a stream must be a subclass of either InputStream or OutputStream ), a Channel can be opened for reading, for writing, or for both.
+
+Because they are bi-directional, channels better reflect the reality of the underlying operating system than streams do. In the UNIX model in particular, the underlying operating system channels are bi-directional.
